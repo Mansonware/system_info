@@ -3,6 +3,19 @@ import socket
 import getpass
 import psutil
 
+
+def get_real_ip():
+    """Pega o IP real da rede (não o localhost do WSL)."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "N/A"
+
+
 def system_info():
     print("\n===== SYSTEM INFO TOOL =====\n")
 
@@ -30,11 +43,11 @@ def system_info():
     # Rede
     print("\n--- NETWORK ---")
     hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
     print(f"Hostname: {hostname}")
-    print(f"Local IP: {ip}")
+    print(f"Local IP: {get_real_ip()}")
 
     print("\n===========================\n")
+
 
 if __name__ == "__main__":
     system_info()
