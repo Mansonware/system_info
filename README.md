@@ -41,7 +41,7 @@ Este projeto foi criado com o objetivo de praticar:
 
 ## 📥 Como executar
 
-### 1. Instalar dependência
-
+### 1. Clone o repositório
 ```bash
-pip install psutil
+git clone https://github.com/Mansonware/system_info.git
+cd system_info
