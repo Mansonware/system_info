@@ -27,7 +27,7 @@ Uma ferramenta de linha de comando para exibir informações detalhadas do siste
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/system-info-tool.git
+git clone https://github.com/Mansonware/system-info-tool.git
 cd system-info-tool
 
 # Instale a dependência
