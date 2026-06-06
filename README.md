@@ -1,47 +1,34 @@
-<h1 align="center">🧠 System Info Tool</h1>
+# 🔍 System Info Tool
 
-<p align="center">
-  Projeto simples em Python para coleta de informações do sistema.
-</p>
+Uma ferramenta de linha de comando para exibir informações detalhadas do sistema, otimizada para **desktop e dispositivos móveis** (Termux no Android, iSH no iOS).
 
----
+![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## 🚀 Sobre o projeto
+## ✨ Funcionalidades
 
-O **System Info Tool** é uma ferramenta desenvolvida em Python que exibe informações básicas do sistema operacional, CPU, memória e rede.
+- 🖥️ **Sistema operacional** (usuário, hostname, kernel, arquitetura, tempo de inicialização)
+- 🧠 **CPU** (uso percentual, frequência, número de núcleos)
+- 💾 **Memória RAM e Swap** (total, disponível, uso em GB)
+- 💿 **Discos e partições** (capacidade, uso, ponto de montagem)
+- 🌐 **Rede** (IP local, IP público, interfaces ativas)
+- 🔋 **Bateria** (percentual, tempo restante, status de carga)
+- ⚙️ **Top processos** (5 mais intensivos em CPU)
+- 📱 **Interface responsiva** – adapta automaticamente a largura do terminal para celular
+- 🎨 **Cores ANSI** (opcionais, podem ser desligadas)
+- ♻️ **Loop interativo** – atualize com Enter, saia com Q
 
-Este projeto foi criado com o objetivo de praticar:
+## 📦 Requisitos
 
-- Python básico
-- Manipulação de bibliotecas do sistema
-- Conceitos iniciais de automação
-- Fundamentos de sistemas operacionais
+- Python 3.7 ou superior
+- Pip (gerenciador de pacotes)
 
----
+## 🚀 Instalação
 
-## ⚙️ Funcionalidades
-
-- 👤 Exibe o usuário do sistema
-- 💻 Mostra informações do sistema operacional
-- 🧠 Informações da CPU
-- 🧾 Uso de memória RAM
-- 🌐 Informações de rede (hostname e IP local)
-
----
-
-## 🧰 Tecnologias utilizadas
-
-- 🐍 Python 3
-- 📦 psutil
-- 🧩 platform
-- 🌐 socket
-- 👤 getpass
-
----
-
-## 📥 Como executar
-
-### 1. Clone o repositório
 ```bash
-git clone https://github.com/Mansonware/system_info.git
-cd system_info
+# Clone o repositório
+git clone https://github.com/seu-usuario/system-info-tool.git
+cd system-info-tool
+
+# Instale a dependência
+pip install -r requirements.txt
