@@ -1,0 +1,4 @@
+# Dependência opcional — habilita a inteligência completa (CPU por núcleo,
+# memória/swap, discos, interfaces de rede, bateria, sensores e processos).
+# Sem ela, a ferramenta degrada graciosamente para um modo somente-stdlib.
+psutil>=5.9.0
