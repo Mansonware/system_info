@@ -43,6 +43,9 @@ except Exception:  # pragma: no cover - ambiente sem psutil
 
 __version__ = "2.0.0"
 
+# Seções disponíveis, na ordem de renderização. "host" é sempre coletada.
+ALL_SECTIONS = ("host", "cpu", "memory", "disks", "network", "sensors", "processes")
+
 # --------------------------------------------------------------------------- #
 #  Camada de apresentação (cores ANSI / layout)                               #
 # --------------------------------------------------------------------------- #
@@ -173,8 +176,15 @@ def get_public_ip(timeout: float = 2.5) -> str:
     return "N/A (offline?)"
 
 
-def collect(probe_public_ip: bool = True) -> dict:
-    """Reúne todo o dossiê do host num dicionário serializável."""
+def collect(probe_public_ip: bool = True, sections=None) -> dict:
+    """Reúne o dossiê do host num dicionário serializável.
+
+    Apenas as ``sections`` solicitadas são sondadas — assim um run filtrado
+    (``-s host``) ou em watch mode não paga por lookups de IP público ou pelo
+    sampling de CPU/processos cujos dados seriam descartados. ``None`` coleta
+    tudo. A seção ``host`` é sempre incluída (é barata e identifica o dossiê).
+    """
+    want = set(ALL_SECTIONS if sections is None else sections)
     data: dict = {}
 
     # --- Identidade / SO --------------------------------------------------- #
@@ -200,7 +210,7 @@ def collect(probe_public_ip: bool = True) -> dict:
 
     # --- CPU --------------------------------------------------------------- #
     cpu: dict = {}
-    if _HAS_PSUTIL:
+    if "cpu" in want and _HAS_PSUTIL:
         freq = psutil.cpu_freq()
         try:
             load = os.getloadavg()
@@ -219,7 +229,7 @@ def collect(probe_public_ip: bool = True) -> dict:
 
     # --- Memória ----------------------------------------------------------- #
     mem: dict = {}
-    if _HAS_PSUTIL:
+    if "memory" in want and _HAS_PSUTIL:
         vm = psutil.virtual_memory()
         sm = psutil.swap_memory()
         mem = {
@@ -232,7 +242,7 @@ def collect(probe_public_ip: bool = True) -> dict:
 
     # --- Discos ------------------------------------------------------------ #
     disks = []
-    if _HAS_PSUTIL:
+    if "disks" in want and _HAS_PSUTIL:
         for part in psutil.disk_partitions(all=False):
             try:
                 usage = psutil.disk_usage(part.mountpoint)
@@ -249,13 +259,12 @@ def collect(probe_public_ip: bool = True) -> dict:
     data["disks"] = disks
 
     # --- Rede -------------------------------------------------------------- #
-    net: dict = {
-        "local_ip": get_real_ip(),
-        "public_ip": get_public_ip() if probe_public_ip else "(pulado)",
-        "interfaces": [],
-        "connections": None,
-    }
-    if _HAS_PSUTIL:
+    net: dict = {"local_ip": "(pulado)", "public_ip": "(pulado)",
+                 "interfaces": [], "connections": None}
+    if "network" in want:
+        net["local_ip"] = get_real_ip()
+        net["public_ip"] = get_public_ip() if probe_public_ip else "(pulado)"
+    if "network" in want and _HAS_PSUTIL:
         stats = psutil.net_if_stats()
         for name, addrs in psutil.net_if_addrs().items():
             iface = {"name": name, "up": False, "ipv4": [], "ipv6": [], "mac": None}
@@ -284,7 +293,7 @@ def collect(probe_public_ip: bool = True) -> dict:
 
     # --- Bateria / sensores ------------------------------------------------ #
     sensors: dict = {"battery": None, "temps": None}
-    if _HAS_PSUTIL:
+    if "sensors" in want and _HAS_PSUTIL:
         try:
             bat = psutil.sensors_battery()
             if bat is not None:
@@ -310,7 +319,7 @@ def collect(probe_public_ip: bool = True) -> dict:
 
     # --- Top processos ----------------------------------------------------- #
     procs = []
-    if _HAS_PSUTIL:
+    if "processes" in want and _HAS_PSUTIL:
         snapshot = []
         for p in psutil.process_iter(["pid", "name", "username"]):
             try:
@@ -350,9 +359,6 @@ def collect(probe_public_ip: bool = True) -> dict:
 # --------------------------------------------------------------------------- #
 #  Renderização                                                               #
 # --------------------------------------------------------------------------- #
-
-ALL_SECTIONS = ("host", "cpu", "memory", "disks", "network", "sensors", "processes")
-
 
 def _secs_to_hm(secs) -> str:
     if secs is None or secs < 0:
@@ -536,14 +542,14 @@ def main(argv=None) -> int:
     probe_pub = not args.no_net
 
     if args.json:
-        data = collect(probe_public_ip=probe_pub)
+        data = collect(probe_public_ip=probe_pub, sections=sections)
         print(json.dumps(data, indent=2, ensure_ascii=False))
         return 0
 
     if args.watch:
         try:
             while True:
-                data = collect(probe_public_ip=probe_pub)
+                data = collect(probe_public_ip=probe_pub, sections=sections)
                 sys.stdout.write("\033[2J\033[H")  # limpa tela
                 print(render(data, sections))
                 print(C.paint(f"\n  ↻ atualizando a cada {args.interval}s "
@@ -553,7 +559,7 @@ def main(argv=None) -> int:
             print(C.paint("\n  [✓] sessão encerrada.", C.GREEN))
             return 0
 
-    data = collect(probe_public_ip=probe_pub)
+    data = collect(probe_public_ip=probe_pub, sections=sections)
     print(render(data, sections))
     return 0
 
